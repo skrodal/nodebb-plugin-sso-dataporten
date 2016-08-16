@@ -16,7 +16,7 @@
 		'admin': {
 			'icon': 'fa-unlock',
 			'route': '/plugins/sso-dataporten',
-			'name': 'Logg inn med Dataporten',
+			'name': 'Dataporten',
 			'color': '#E92631'
 		}
 	});
@@ -54,8 +54,8 @@
 					name: 'dataporten',
 					url: '/auth/dataporten',
 					callbackURL: '/auth/dataporten/callback',
-					icon: constants.admin.icon,
-					scope: 'userid:email:profile'
+					icon: constants.admin.icon
+					//scope: 'userid:email:profile'
 				});
 			}
 
