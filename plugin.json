@@ -1,0 +1,18 @@
+{
+	"id": "nodebb-plugin-sso-dataporten",
+	"name": "NodeBB Dataporten SSO",
+	"description": "NodeBB Plugin that allows users to login/register via Dataporten from UNINETT.",
+	"url": "https://github.com/skrodal/nodebb-plugin-sso-dataporten",
+	"library": "./library.js",
+	"hooks": [
+		{ "hook": "static:app.load", "method": "init" },
+		{ "hook": "filter:auth.init", "method": "getStrategy" },
+		{ "hook": "filter:auth.list", "method": "getAssociation" },
+		{ "hook": "filter:admin.header.build", "method": "addMenuItem" },
+		{ "hook": "static:user.delete", "method": "deleteUserData" }
+	],
+	"templates": "./templates",
+	"acpScripts": [
+		"static/lib/admin.js"
+	]
+}

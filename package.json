@@ -1,0 +1,35 @@
+{
+  "name": "nodebb-plugin-sso-dataporten",
+  "version": "1.0.0",
+  "description": "NodeBB OAuth2 login with Dataporten",
+  "main": "library.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skrodal/nodebb-plugin-sso-dataporten"
+  },
+  "keywords": [
+    "nodebb",
+    "plugin",
+    "dataporten",
+    "oauth2",
+    "sso",
+    "single sign on",
+    "registration"
+  ],
+  "author": {
+    "name": "Simon Skrødal",
+    "email": "simon.skrodal@uninett.no"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/skrodal/nodebb-plugin-sso-dataporten/issues"
+  },
+  "readme": "",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "passport-dataporten": "~1.1.3"
+  },
+  "nbbpm": {
+    "compatibility": "^1.0.1"
+  }
+}
