@@ -39,7 +39,7 @@
 
 					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
 					// Email is also username for now (second arg.)
-					Dataporten.login(profile.id, email, email, profile.displayName, function(err, user) {
+					Dataporten.login(profile.id, 'simon.skrodal_uninett', email, profile.displayName, function(err, user) {
 						if (err) {
 							return done(err);
 						}
