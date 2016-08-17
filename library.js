@@ -11,8 +11,6 @@
 
 	var authenticationController = module.parent.require('./controllers/authentication');
 	
-	var winston = require('winston');
-
 	
 	var constants = Object.freeze({
 		'name': "Dataporten",
@@ -34,9 +32,11 @@
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
 					
-					winston.info(profile);
-					winston.info(req);
-					
+					console.log("*** PROFILE ***");
+					console.log(profile);
+
+					console.log("*** REQ ***");
+					console.log(req);
 
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
 						// Save Dataporten -specific information to the user
