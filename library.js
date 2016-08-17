@@ -38,8 +38,11 @@
 					}
 
 					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
-					// Email is also username for now (second arg.)
-					Dataporten.login(profile.id, email, email, profile.displayName, function(err, user) {
+					// Build a username from Email ('@' is illegal in usernames)
+
+					var userName = email.replace('@', '_').replace('.no', '');
+
+					Dataporten.login(profile.id, userName, email, profile.displayName, function(err, user) {
 						if (err) {
 							return done(err);
 						}
