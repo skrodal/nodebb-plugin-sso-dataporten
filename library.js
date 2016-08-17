@@ -50,14 +50,9 @@
 						return done(null, req.user);
 					}
 
-					//Dataporten.login(profile.id, profile.displayName, profile.emails[0].value, profile.photos[0].value, function(err, user) {
-
-					var email = profile.emails[0].value ? 'simon@uninett.no';
-					var photo = profile.photos[0].value ? null;
-
-					Dataporten.login(profile.id, profile.displayName, email, photo, function(err, user) {
+					Dataporten.login(profile.id, profile.displayName, profile.emails[0].value, profile.photos[0].value, function(err, user) {
 						if (err) {
-							return done(err);
+							return done(profile);
 						}
 
 						authenticationController.onSuccessfulLogin(req, user.uid);
