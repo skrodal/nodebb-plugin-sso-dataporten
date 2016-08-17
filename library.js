@@ -2,6 +2,7 @@
 	"use strict";
 
 	var User = module.parent.require('./user'),
+	    winston = module.parent.require('winston');
 		db = module.parent.require('./database'),
 		meta = module.parent.require('./meta'),
 		nconf = module.parent.require('nconf'),
