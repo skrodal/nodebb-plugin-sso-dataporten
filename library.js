@@ -29,23 +29,27 @@
 				passport.use(new DataportenStrategy({
 					clientID: settings.id,
 					clientSecret: settings.secret,
-					callbackURL: nconf.get('url') + '/auth/dataporten/callback',
-					passReqToCallback: true
-				}, function(req, token, tokenSecret, profile, done) {
-					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
+					callbackURL: nconf.get('url') + '/auth/dataporten/callback' //, passReqToCallback: true
+				}, 
+
+				function(req, token, tokenSecret, profile, done) {
+
+					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('userid') && req.user.userid > 0) {
 						// Save Dataporten -specific information to the user
-						User.setUserField(req.user.uid, 'dataportenid', profile.id);
-						db.setObjectField('dataporten:uid', profile.id, req.user.uid);
+						User.setUserField(req.user.userid, 'dataportenid', profile.id);
+						db.setObjectField('dataportenid:id', profile.id, req.user.userid);
 						return done(null, req.user);
 					}
 
+
 					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
+
 					Dataporten.login(profile.id, profile.displayName, email, function(err, user) {
 						if (err) {
 							return done(err);
 						}
 
-						authenticationController.onSuccessfulLogin(req, user.uid);
+						authenticationController.onSuccessfulLogin(req, user.userid);
 						done(null, user);
 					});
 				}));
@@ -64,7 +68,7 @@
 	};
 
 	Dataporten.getAssociation = function(data, callback) {
-		User.getUserField(data.uid, 'dataportenid', function(err, dataportenid) {
+		User.getUserField(data.userid, 'dataportenid', function(err, dataportenid) {
 			if (err) {
 				return callback(err, data);
 			}
@@ -90,40 +94,40 @@
 
 	Dataporten.login = function(dataportenID, username, email, callback) {
 		if (!email) {
-			email = username + '@users.noreply.dataporten.no';
+			email = dataportenID + '@users.noreply.dataporten.no';
 		}
 		
-		Dataporten.getUidByDataportenID(dataportenID, function(err, uid) {
+		Dataporten.getUidByDataportenID(dataportenID, function(err, id) {
 			if (err) {
 				return callback(err);
 			}
 
-			if (uid) {
+			if (id) {
 				// Existing User
 				callback(null, {
-					uid: uid
+					id: id
 				});
 			} else {
 				// New User
-				var success = function(uid) {
-					User.setUserField(uid, 'dataportenid', dataportenID);
-					db.setObjectField('dataportenid:uid', dataportenID, uid);
+				var success = function(id) {
+					User.setUserField(id, 'dataportenid', dataportenID);
+					db.setObjectField('dataportenid:id', dataportenID, id);
 					callback(null, {
-						uid: uid
+						id: id
 					});
 				};
 
-				User.getUidByEmail(email, function(err, uid) {
-					if (!uid) {
-						User.create({username: username, email: email}, function(err, uid) {
+				User.getUidByEmail(email, function(err, id) {
+					if (!id) {
+						User.create({username: username, email: email}, function(err, id) {
 							if (err !== null) {
 								callback(err);
 							} else {
-								success(uid);
+								success(id);
 							}
 						});
 					} else {
-						success(uid); // Existing account -- merge
+						success(id); // Existing account -- merge
 					}
 				});
 			}
@@ -131,11 +135,11 @@
 	};
 
 	Dataporten.getUidByDataportenID = function(dataportenID, callback) {
-		db.getObjectField('dataportenid:uid', dataportenID, function(err, uid) {
+		db.getObjectField('dataportenid:id', dataportenID, function(err, id) {
 			if (err) {
 				callback(err);
 			} else {
-				callback(null, uid);
+				callback(null, id);
 			}
 		});
 	};
@@ -164,19 +168,19 @@
 	};
 
 	Dataporten.deleteUserData = function(data, callback) {
-		var uid = data.uid;
+		var id = data.id;
 
 		async.waterfall([
-			async.apply(User.getUserField, uid, 'dataportenid'),
+			async.apply(User.getUserField, id, 'dataportenid'),
 			function(oAuthIdToDelete, next) {
-				db.deleteObjectField('dataportenid:uid', oAuthIdToDelete, next);
+				db.deleteObjectField('dataportenid:id', oAuthIdToDelete, next);
 			}
 		], function(err) {
 			if (err) {
-				winston.error('[sso-dataporten] Could not remove OAuthId data for uid ' + uid + '. Error: ' + err);
+				winston.error('[sso-dataporten] Could not remove OAuthId data for user ID ' + id + '. Error: ' + err);
 				return callback(err);
 			}
-			callback(null, uid);
+			callback(null, id);
 		});
 	};
 
