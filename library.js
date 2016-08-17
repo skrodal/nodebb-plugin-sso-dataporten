@@ -29,11 +29,18 @@
 				passport.use(new DataportenStrategy({
 					clientID: settings.id,
 					clientSecret: settings.secret,
-					callbackURL: nconf.get('url') + '/auth/dataporten/callback', 
-					passReqToCallback: true
+					callbackURL: nconf.get('url') + '/auth/dataporten/callback' 
+					//,  passReqToCallback: true
 				}, 
+				//function(req, token, tokenSecret, profile, done) {
 
-				function(req, token, tokenSecret, profile, done) {
+			    function(accessToken, refreshToken, profile, done) {
+			        User.findOrCreate({ id: profile.id }, function (err, user) {
+			            return done(err, user);
+			    });
+
+
+/*
 
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('userid') && req.user.userid > 0) {
 						// Save Dataporten -specific information to the user
@@ -42,7 +49,7 @@
 						return done(null, req.user);
 					}
 
-
+*/
 					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
 
 					Dataporten.login(profile.id, profile.displayName, email, function(err, user) {
