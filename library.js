@@ -10,7 +10,9 @@
 		DataportenStrategy = require('passport-dataporten').Strategy;
 
 	var authenticationController = module.parent.require('./controllers/authentication');
-
+	
+	var winston = require('winston');
+	
 	var constants = Object.freeze({
 		'name': "Dataporten",
 		'admin': {
@@ -31,8 +33,8 @@
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
 					
-					console.log(profile);
-					console.log(req);
+					winston.info(profile);
+					winston.info(req);
 					
 
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
