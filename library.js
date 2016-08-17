@@ -15,9 +15,7 @@
 		'name': "Dataporten",
 		'admin': {
 			'icon': 'fa-unlock',
-			'route': '/plugins/sso-dataporten',
-			'name': 'Dataporten',
-			'color': '#E92631'
+			'route': '/plugins/sso-dataporten'
 		}
 	});
 
@@ -29,35 +27,24 @@
 				passport.use(new DataportenStrategy({
 					clientID: settings.id,
 					clientSecret: settings.secret,
-					callbackURL: nconf.get('url') + '/auth/dataporten/callback' 
-					//,  passReqToCallback: true
-				}, 
-				//function(req, token, tokenSecret, profile, done) {
-
-			    function(accessToken, refreshToken, profile, done) {
-			        User.findOrCreate({ id: profile.id }, function (err, user) {
-			            return done(err, user);
-			    });
-
-
-/*
-
-					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('userid') && req.user.userid > 0) {
+					callbackURL: nconf.get('url') + '/auth/dataporten/callback',
+					passReqToCallback: true
+				}, function(req, token, tokenSecret, profile, done) {
+					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
 						// Save Dataporten -specific information to the user
-						User.setUserField(req.user.userid, 'dataportenid', profile.id);
-						db.setObjectField('dataportenid:id', profile.id, req.user.userid);
+						User.setUserField(req.user.uid, 'dataportenid', profile.id);
+						db.setObjectField('dataportenid:uid', profile.id, req.user.uid);
 						return done(null, req.user);
 					}
 
-*/
 					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
-
-					Dataporten.login(profile.id, profile.displayName, email, function(err, user) {
+					// Email is also username for now (second arg.)
+					Dataporten.login(profile.id, email, email, profile.displayName, function(err, user) {
 						if (err) {
 							return done(err);
 						}
 
-						authenticationController.onSuccessfulLogin(req, user.userid);
+						authenticationController.onSuccessfulLogin(req, user.uid);
 						done(null, user);
 					});
 				}));
@@ -67,7 +54,6 @@
 					url: '/auth/dataporten',
 					callbackURL: '/auth/dataporten/callback',
 					icon: constants.admin.icon
-					//scope: 'userid:email:profile'
 				});
 			}
 
@@ -76,7 +62,7 @@
 	};
 
 	Dataporten.getAssociation = function(data, callback) {
-		User.getUserField(data.userid, 'dataportenid', function(err, dataportenid) {
+		User.getUserField(data.uid, 'dataportenid', function(err, dataportenid) {
 			if (err) {
 				return callback(err, data);
 			}
@@ -100,42 +86,42 @@
 		})
 	};
 
-	Dataporten.login = function(dataportenID, username, email, callback) {
+	Dataporten.login = function(dataportenID, username, email, displayName, callback) {
 		if (!email) {
 			email = dataportenID + '@users.noreply.dataporten.no';
 		}
 		
-		Dataporten.getUidByDataportenID(dataportenID, function(err, id) {
+		Dataporten.getUidByDataportenID(dataportenID, function(err, uid) {
 			if (err) {
 				return callback(err);
 			}
 
-			if (id) {
+			if (uid) {
 				// Existing User
 				callback(null, {
-					id: id
+					uid: uid
 				});
 			} else {
 				// New User
-				var success = function(id) {
-					User.setUserField(id, 'dataportenid', dataportenID);
-					db.setObjectField('dataportenid:id', dataportenID, id);
+				var success = function(uid) {
+					User.setUserField(uid, 'dataportenid', dataportenID);
+					db.setObjectField('dataportenid:uid', dataportenID, uid);
 					callback(null, {
-						id: id
+						uid: uid
 					});
 				};
 
-				User.getUidByEmail(email, function(err, id) {
-					if (!id) {
-						User.create({username: username, email: email}, function(err, id) {
+				User.getUidByEmail(email, function(err, uid) {
+					if (!uid) {
+						User.create({username: username, email: email, name: displayName}, function(err, uid) {
 							if (err !== null) {
 								callback(err);
 							} else {
-								success(id);
+								success(uid);
 							}
 						});
 					} else {
-						success(id); // Existing account -- merge
+						success(uid); // Existing account -- merge
 					}
 				});
 			}
@@ -143,11 +129,11 @@
 	};
 
 	Dataporten.getUidByDataportenID = function(dataportenID, callback) {
-		db.getObjectField('dataportenid:id', dataportenID, function(err, id) {
+		db.getObjectField('dataportenid:uid', dataportenID, function(err, uid) {
 			if (err) {
 				callback(err);
 			} else {
-				callback(null, id);
+				callback(null, uid);
 			}
 		});
 	};
@@ -176,19 +162,19 @@
 	};
 
 	Dataporten.deleteUserData = function(data, callback) {
-		var id = data.id;
+		var uid = data.uid;
 
 		async.waterfall([
-			async.apply(User.getUserField, id, 'dataportenid'),
+			async.apply(User.getUserField, uid, 'dataportenid'),
 			function(oAuthIdToDelete, next) {
-				db.deleteObjectField('dataportenid:id', oAuthIdToDelete, next);
+				db.deleteObjectField('dataportenid:uid', oAuthIdToDelete, next);
 			}
 		], function(err) {
 			if (err) {
-				winston.error('[sso-dataporten] Could not remove OAuthId data for user ID ' + id + '. Error: ' + err);
+				winston.error('[sso-dataporten] Could not remove OAuthId data for uid ' + uid + '. Error: ' + err);
 				return callback(err);
 			}
-			callback(null, id);
+			callback(null, uid);
 		});
 	};
 
