@@ -29,7 +29,8 @@
 				passport.use(new DataportenStrategy({
 					clientID: settings.id,
 					clientSecret: settings.secret,
-					callbackURL: nconf.get('url') + '/auth/dataporten/callback' //, passReqToCallback: true
+					callbackURL: nconf.get('url') + '/auth/dataporten/callback', 
+					passReqToCallback: true
 				}, 
 
 				function(req, token, tokenSecret, profile, done) {
