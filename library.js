@@ -31,7 +31,8 @@
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
 					
-					callback(profile);
+					console.log(profile);
+					console.log(req);
 					
 
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
