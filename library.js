@@ -6,9 +6,15 @@
 		meta = module.parent.require('./meta'),
 		nconf = module.parent.require('nconf'),
 		async = module.parent.require('async'),
-		winston = module.parent.require('winston'),
 		passport = module.parent.require('passport'),
 		DataportenStrategy = require('passport-dataporten').Strategy;
+
+	  var winston = module.parent.require('winston');
+	  var plugins = module.parent.require('./plugins');
+	  var fs = require('fs');
+	  var path = require('path');
+	  var util = require('util');
+	  var app;
 
 	var authenticationController = module.parent.require('./controllers/authentication');
 	
@@ -22,16 +28,6 @@
 
 	var Dataporten = {};
 
-	winston.remove(winston.transports.Console);
-	winston.add(winston.transports.Console, {
-	        colorize: true,
-	        timestamp: function() {
-	                var date = new Date();
-	                return date.getDate() + '/' + (date.getMonth() + 1) + ' ' + date.toTimeString().substr(0,5) + ' :';
-	        },
-	        level: 'verbose'
-	});
-
 	Dataporten.getStrategy = function(strategies, callback) {
 		meta.settings.get('sso-dataporten', function(err, settings) {
 			if (!err && settings.id && settings.secret) {
@@ -42,11 +38,11 @@
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
 					
-					winston.info("*** PROFILE ***");
-					winston.info(profile);
+					winston.warn("*** PROFILE ***");
+					winston.warn(profile);
 
-					winston.log("*** REQ ***");
-					winston.log(req);
+					winston.warn("*** REQ ***");
+					winston.warn(req);
 
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
 						// Save Dataporten -specific information to the user
