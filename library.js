@@ -41,9 +41,10 @@
 					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
 					// Build a username from Email ('@' is illegal in usernames)
 
-					var userName = email.replace('@', '_').replace('.no', '');
+					var userName = 'Simon';// email.replace('@', '_').replace('.no', '');
 
-					Dataporten.login(profile.id, userName, email, profile.displayName, function(err, user) {
+					//Dataporten.login(profile.id, userName, email, profile.displayName, function(err, user) {
+					Dataporten.login(profile.id, userName, email, function(err, user) {
 						if (err) {
 							return done(err);
 						}
@@ -90,7 +91,8 @@
 		})
 	};
 
-	Dataporten.login = function(dataportenID, username, email, displayName, callback) {
+	//Dataporten.login = function(dataportenID, username, email, displayName, callback) {
+	Dataporten.login = function(dataportenID, username, email, callback) {
 		if (!email) {
 			email = dataportenID + '@users.noreply.dataporten.no';
 		}
@@ -117,6 +119,7 @@
 
 				User.getUidByEmail(email, function(err, uid) {
 					if (!uid) {
+						//User.create({username: username, email: email, name: displayName}, function(err, uid) {
 						User.create({username: username, email: email, name: displayName}, function(err, uid) {
 							if (err !== null) {
 								callback(err);
