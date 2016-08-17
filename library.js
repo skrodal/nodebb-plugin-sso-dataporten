@@ -6,11 +6,11 @@
 		meta = module.parent.require('./meta'),
 		nconf = module.parent.require('nconf'),
 		async = module.parent.require('async'),
+		winston = module.parent.require('winston'),
 		passport = module.parent.require('passport'),
 		DataportenStrategy = require('passport-dataporten').Strategy;
 
 	var authenticationController = module.parent.require('./controllers/authentication');
-	
 	
 	var constants = Object.freeze({
 		'name': "Dataporten",
@@ -32,11 +32,11 @@
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
 					
-					console.log("*** PROFILE ***");
-					console.log(profile);
+					winston.info("*** PROFILE ***");
+					winston.info(profile);
 
-					console.log("*** REQ ***");
-					console.log(req);
+					winston.log("*** REQ ***");
+					winston.log(req);
 
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
 						// Save Dataporten -specific information to the user
