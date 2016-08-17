@@ -30,7 +30,6 @@
 					callbackURL: nconf.get('url') + '/auth/dataporten/callback',
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
-					console.log(profile);
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
 						// Save Dataporten -specific information to the user
 						User.setUserField(req.user.uid, 'dataportenid', profile.id);
@@ -41,10 +40,10 @@
 					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
 					// Build a username from Email ('@' is illegal in usernames)
 
-					var userName = 'Simon';// email.replace('@', '_').replace('.no', '');
+					// var userName = 'Simon';// email.replace('@', '_').replace('.no', '');
 
 					//Dataporten.login(profile.id, userName, email, profile.displayName, function(err, user) {
-					Dataporten.login(profile.id, userName, email, function(err, user) {
+					Dataporten.login(profile.id, profile.id, email, function(err, user) {
 						if (err) {
 							return done(err);
 						}
