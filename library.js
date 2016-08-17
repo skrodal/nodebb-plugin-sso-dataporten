@@ -2,49 +2,55 @@
 	"use strict";
 
 	var User = module.parent.require('./user'),
-		db = module.parent.require('./database'),
 		meta = module.parent.require('./meta'),
-		nconf = module.parent.require('nconf'),
-		async = module.parent.require('async'),
+		db = module.parent.require('../src/database'),
 		passport = module.parent.require('passport'),
-		DataportenStrategy = require('passport-dataporten').Strategy;
+		passportDataporten = require('passport-dataporten').Strategy,
+		fs = module.parent.require('fs'),
+		path = module.parent.require('path'),
+		nconf = module.parent.require('nconf'),
+		async = module.parent.require('async');
 
 	var authenticationController = module.parent.require('./controllers/authentication');
-	
+
 	var constants = Object.freeze({
 		'name': "Dataporten",
 		'admin': {
-			'icon': 'fa-unlock',
-			'route': '/plugins/sso-dataporten'
+			'route': '/plugins/sso-dataporten',
+			'icon': 'fa-unlock'
 		}
 	});
 
 	var Dataporten = {};
 
+	Dataporten.init = function(data, callback) {
+		function render(req, res, next) {
+			res.render('admin/plugins/sso-dataporten', {});
+		}
+
+		data.router.get('/admin/plugins/sso-dataporten', data.middleware.admin.buildHeader, render);
+		data.router.get('/api/admin/plugins/sso-dataporten', render);
+
+		callback();
+	}
+
 	Dataporten.getStrategy = function(strategies, callback) {
 		meta.settings.get('sso-dataporten', function(err, settings) {
-			if (!err && settings.id && settings.secret) {
-				passport.use(new DataportenStrategy({
-					clientID: settings.id,
-					clientSecret: settings.secret,
+			if (!err && settings['id'] && settings['secret']) {
+				passport.use(new passportDataporten({
+					clientID: settings['id'],
+					clientSecret: settings['secret'],
 					callbackURL: nconf.get('url') + '/auth/dataporten/callback',
 					passReqToCallback: true
-				}, function(req, token, tokenSecret, profile, done) {
-
-			        User.findOrCreate({ id: profile.id }, function (err, user) {
-			            return done(err, user);
-			        });
-
+				}, function(req, accessToken, refreshToken, profile, done) {
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
-						// Save Dataporten -specific information to the user
+						// Save Dataporten-specific information to the user
 						User.setUserField(req.user.uid, 'dataportenid', profile.id);
 						db.setObjectField('dataportenid:uid', profile.id, req.user.uid);
 						return done(null, req.user);
 					}
 
-					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
-					// Email is also username for now (second arg.)
-					Dataporten.login(profile.id, 'simon.skrodal_uninett', email, profile.displayName, function(err, user) {
+					Dataporten.login(profile.id, profile.displayName, profile.emails[0].value, profile.photos[0].value, function(err, user) {
 						if (err) {
 							return done(err);
 						}
@@ -58,7 +64,10 @@
 					name: 'dataporten',
 					url: '/auth/dataporten',
 					callbackURL: '/auth/dataporten/callback',
-					icon: constants.admin.icon
+					icon: constants.admin.icon,
+					// scope: 'https://www.dataportenapis.com/auth/userinfo.profile https://www.dataportenapis.com/auth/userinfo.email',
+					//scope: 'https://auth.dataporten.no/userinfo',
+					prompt: 'select_account'
 				});
 			}
 
@@ -91,17 +100,13 @@
 		})
 	};
 
-	Dataporten.login = function(dataportenID, username, email, displayName, callback) {
-		if (!email) {
-			email = dataportenID + '@users.noreply.dataporten.no';
-		}
-		
-		Dataporten.getUidByDataportenID(dataportenID, function(err, uid) {
-			if (err) {
+	Dataporten.login = function(dataportenid, handle, email, picture, callback) {
+		Dataporten.getUidByDataportenId(dataportenid, function(err, uid) {
+			if(err) {
 				return callback(err);
 			}
 
-			if (uid) {
+			if (uid !== null) {
 				// Existing User
 				callback(null, {
 					uid: uid
@@ -109,21 +114,38 @@
 			} else {
 				// New User
 				var success = function(uid) {
-					User.setUserField(uid, 'dataportenid', dataportenID);
-					db.setObjectField('dataportenid:uid', dataportenID, uid);
-					callback(null, {
-						uid: uid
+					meta.settings.get('sso-dataporten', function(err, settings) {
+						var autoConfirm = settings && settings['autoconfirm'] === "on" ? 1 : 0;
+						User.setUserField(uid, 'email:confirmed', autoConfirm);
+						// Save dataporten-specific information to the user
+						User.setUserField(uid, 'dataportenid', dataportenid);
+						db.setObjectField('dataportenid:uid', dataportenid, uid);
+
+						// Save their photo, if present
+						if (picture) {
+							User.setUserField(uid, 'uploadedpicture', picture);
+							User.setUserField(uid, 'picture', picture);
+						}
+
+						callback(null, {
+							uid: uid
+						});
+
 					});
 				};
 
 				User.getUidByEmail(email, function(err, uid) {
+					if(err) {
+						return callback(err);
+					}
+
 					if (!uid) {
-						User.create({username: username, email: email, name: displayName}, function(err, uid) {
-							if (err !== null) {
-								callback(err);
-							} else {
-								success(uid);
+						User.create({username: handle, email: email}, function(err, uid) {
+							if(err) {
+								return callback(err);
 							}
+
+							success(uid);
 						});
 					} else {
 						success(uid); // Existing account -- merge
@@ -133,13 +155,12 @@
 		});
 	};
 
-	Dataporten.getUidByDataportenID = function(dataportenID, callback) {
-		db.getObjectField('dataportenid:uid', dataportenID, function(err, uid) {
+	Dataporten.getUidByDataportenId = function(dataportenid, callback) {
+		db.getObjectField('dataportenid:uid', dataportenid, function(err, uid) {
 			if (err) {
-				callback(err);
-			} else {
-				callback(null, uid);
+				return callback(err);
 			}
+			callback(null, uid);
 		});
 	};
 
@@ -151,20 +172,7 @@
 		});
 
 		callback(null, custom_header);
-	};
-
-	Dataporten.init = function(data, callback) {
-		function renderAdmin(req, res) {
-			res.render('admin/plugins/sso-dataporten', {
-				callbackURL: nconf.get('url') + '/auth/dataporten/callback'
-			});
-		}
-
-		data.router.get('/admin/plugins/sso-dataporten', data.middleware.admin.buildHeader, renderAdmin);
-		data.router.get('/api/admin/plugins/sso-dataporten', renderAdmin);
-
-		callback();
-	};
+	}
 
 	Dataporten.deleteUserData = function(data, callback) {
 		var uid = data.uid;
