@@ -30,7 +30,7 @@
 					callbackURL: nconf.get('url') + '/auth/dataporten/callback',
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
-					winston.error('Profile: ' + profile + '. Req: ' + req);
+					
 					callback(profile);
 					
 
