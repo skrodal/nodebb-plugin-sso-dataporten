@@ -30,6 +30,8 @@
 					callbackURL: nconf.get('url') + '/auth/dataporten/callback',
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
+					console.log(profile);
+
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
 						// Save Dataporten -specific information to the user
 						User.setUserField(req.user.uid, 'dataportenid', profile.id);
