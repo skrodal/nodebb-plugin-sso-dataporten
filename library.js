@@ -12,7 +12,7 @@
 	var authenticationController = module.parent.require('./controllers/authentication');
 	
 	var winston = require('winston');
-	var express = require('express');
+
 	
 	var constants = Object.freeze({
 		'name': "Dataporten",
