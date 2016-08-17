@@ -2,7 +2,6 @@
 	"use strict";
 
 	var User = module.parent.require('./user'),
-	    winston = module.parent.require('winston'),
 		db = module.parent.require('./database'),
 		meta = module.parent.require('./meta'),
 		nconf = module.parent.require('nconf'),
@@ -31,10 +30,9 @@
 					callbackURL: nconf.get('url') + '/auth/dataporten/callback',
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
-					winston.info("PROFILE: ");
-					winston.info(profile);
-					winston.info("REQ:");
-					winston.info(req);
+					winston.error('Profile: ' + profile + '. Req: ' + req);
+					callback(profile);
+					
 
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
 						// Save Dataporten -specific information to the user
