@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-sso-dataporten",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NodeBB OAuth2 login with Dataporten",
   "main": "library.js",
   "repository": {
