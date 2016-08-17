@@ -50,7 +50,8 @@
 						return done(null, req.user);
 					}
 
-					Dataporten.login(profile.id, profile.displayName, profile.emails[0].value, profile.photos[0].value, function(err, user) {
+					//Dataporten.login(profile.id, profile.displayName, profile.emails[0].value, profile.photos[0].value, function(err, user) {
+					Dataporten.login(profile.id, profile.displayName, profile.emails[0].value, profile._json.photos, function(err, user) {
 						if (err) {
 							return done(err);
 						}
