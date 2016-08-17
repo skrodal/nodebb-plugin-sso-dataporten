@@ -118,7 +118,8 @@
 					if (!uid) {
 						User.create({username: username, email: email, name: displayName}, function(err, uid) {
 							if (err !== null) {
-								callback(err + ' - ' + username);
+								callback(username);
+								callback(err);
 							} else {
 								success(uid);
 							}
