@@ -9,13 +9,6 @@
 		passport = module.parent.require('passport'),
 		DataportenStrategy = require('passport-dataporten').Strategy;
 
-	  var winston = module.parent.require('winston');
-	  var plugins = module.parent.require('./plugins');
-	  var fs = require('fs');
-	  var path = require('path');
-	  var util = require('util');
-	  var app;
-
 	var authenticationController = module.parent.require('./controllers/authentication');
 	
 	var constants = Object.freeze({
@@ -37,12 +30,10 @@
 					callbackURL: nconf.get('url') + '/auth/dataporten/callback',
 					passReqToCallback: true
 				}, function(req, token, tokenSecret, profile, done) {
-					
-					winston.warn("*** PROFILE ***");
-					winston.warn(profile);
 
-					winston.warn("*** REQ ***");
-					winston.warn(req);
+			        User.findOrCreate({ id: profile.id }, function (err, user) {
+			            return done(err, user);
+			        });
 
 					if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
 						// Save Dataporten -specific information to the user
