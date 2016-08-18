@@ -7,24 +7,38 @@
 		nconf = module.parent.require('nconf'),
 		async = module.parent.require('async'),
 		passport = module.parent.require('passport'),
-		GithubStrategy = require('passport-uninett-dataporten').Strategy;
+		DataportenStrategy = require('passport-uninett-dataporten').Strategy;
 
 	var authenticationController = module.parent.require('./controllers/authentication');
 
 	var constants = Object.freeze({
-		'name': "Dataporten",
+		'name': "dataporten",
 		'admin': {
-			'icon': 'fa-dataporten',
+			'icon': 'fa-unlock',
 			'route': '/plugins/sso-dataporten'
 		}
 	});
 
 	var Dataporten = {};
 
+	Dataporten.init = function(data, callback) {
+		function renderAdmin(req, res) {
+			res.render('admin/plugins/sso-dataporten', {
+				callbackURL: nconf.get('url') + '/auth/dataporten/callback'
+			});
+		}
+
+		data.router.get('/admin/plugins/sso-dataporten', data.middleware.admin.buildHeader, renderAdmin);
+		data.router.get('/api/admin/plugins/sso-dataporten', renderAdmin);
+
+		callback();
+	};
+
+
 	Dataporten.getStrategy = function(strategies, callback) {
 		meta.settings.get('sso-dataporten', function(err, settings) {
 			if (!err && settings.id && settings.secret) {
-				passport.use(new GithubStrategy({
+				passport.use(new DataportenStrategy({
 					clientID: settings.id,
 					clientSecret: settings.secret,
 					callbackURL: nconf.get('url') + '/auth/dataporten/callback',
@@ -89,7 +103,7 @@
 
 	Dataporten.login = function(dataportenID, username, email, callback) {
 		if (!email) {
-			email = username + '@users.noreply.dataporten.com';
+			email = dataportenID + '@users.noreply.dataporten.no';
 		}
 		
 		Dataporten.getUidByDataportenID(dataportenID, function(err, uid) {
@@ -149,18 +163,6 @@
 		callback(null, custom_header);
 	};
 
-	Dataporten.init = function(data, callback) {
-		function renderAdmin(req, res) {
-			res.render('admin/plugins/sso-dataporten', {
-				callbackURL: nconf.get('url') + '/auth/dataporten/callback'
-			});
-		}
-
-		data.router.get('/admin/plugins/sso-dataporten', data.middleware.admin.buildHeader, renderAdmin);
-		data.router.get('/api/admin/plugins/sso-dataporten', renderAdmin);
-
-		callback();
-	};
 
 	Dataporten.deleteUserData = function(data, callback) {
 		var uid = data.uid;
