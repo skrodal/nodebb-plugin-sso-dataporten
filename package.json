@@ -31,7 +31,7 @@
   ],
   "main": "library.js",
   "dependencies": {
-    "passport-uninett-dataporten": "http://github.com/skrodal/passport-uninett-dataporten.git"
+    "passport-uninett-dataporten": "https://github.com/skrodal/passport-uninett-dataporten.git"
   },
   "nbbpm": {
     "compatibility": "^1.0.1"
