@@ -51,8 +51,8 @@
 						return done(null, req.user);
 					}
 
-					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0] : '';
-					var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0] : '';
+					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
+					var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
 
 					Dataporten.login(profile.id, profile.displayName, email, function(err, user) {
 						if (err) {
