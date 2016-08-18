@@ -27,7 +27,7 @@
   "readme": "",
   "readmeFilename": "README.md",
   "dependencies": {
-    "passport-uninett-dataporten": "git://github.com/skrodal/passport-uninett-dataporten.git"
+    "passport-uninett-dataporten": "skrodal/passport-uninett-dataporten"
   },
   "nbbpm": {
     "compatibility": "^1.0.1"
