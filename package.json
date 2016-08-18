@@ -27,7 +27,7 @@
   "readme": "",
   "readmeFilename": "README.md",
   "dependencies": {
-    "skrodal/passport-uninett-dataporten": "~1.1.3"
+    "passport-uninett-dataporten": "skrodal/passport-uninett-dataporten"
   },
   "nbbpm": {
     "compatibility": "^1.0.1"
