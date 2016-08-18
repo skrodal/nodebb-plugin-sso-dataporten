@@ -5,7 +5,7 @@
 		meta = module.parent.require('./meta'),
 		db = module.parent.require('../src/database'),
 		passport = module.parent.require('passport'),
-		passportDataporten = require('passport-dataporten').Strategy,
+		passportDataporten = require('passport-uninett-dataporten').Strategy,
 		fs = module.parent.require('fs'),
 		path = module.parent.require('path'),
 		nconf = module.parent.require('nconf'),
@@ -52,7 +52,7 @@
 
 					Dataporten.login(profile.id, profile.displayName, profile.emails[0].value, profile.photos[0].value, function(err, user) {
 						if (err) {
-							return done(profile);
+							return done(err);
 						}
 
 						authenticationController.onSuccessfulLogin(req, user.uid);
