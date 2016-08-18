@@ -4,7 +4,7 @@ NodeBB Plugin that allows users to login/register via Dataporten from UNINETT.
 
 ## Installation (straight from GitHub repo)
 
-    npm install skrodal/nodebb-plugin-sso-dataporten
+    npm install skrodal/nodebb-plugin-sso-dataporten --save
 
 # Credits 
 
