@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-sso-dataporten",
-  "version": "1.0.01",
+  "version": "1.0.1",
   "description": "NodeBB OAuth2 login with Dataporten",
   "keywords": [
     "nodebb",
@@ -31,7 +31,8 @@
   ],
   "main": "library.js",
   "dependencies": {
-    "passport-uninett-dataporten": "https://github.com/skrodal/passport-uninett-dataporten"
+    "passport-uninett-dataporten": "https://github.com/skrodal/passport-uninett-dataporten", 
+    "unidecode": "^0.1.8", 
   },
   "nbbpm": {
     "compatibility": "^1.0.1"
