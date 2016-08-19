@@ -60,14 +60,17 @@
 						}
 						authenticationController.onSuccessfulLogin(req, user.uid);
 
-						var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
+
 						// Set profile photo as well (if available)
+						var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
 						if(profile.photo){
-							User.uploadFromUrl(uid, profile.photo, callback, function(err, uid) {
+							User.uploadFromUrl(profile.id, profile.photo, callback, function(err, uid) {
 								if (err !== null) { callback(err); } 
 								else { success(uid); }
 							});
 						}
+
+
 						done(null, user);
 					});
 
