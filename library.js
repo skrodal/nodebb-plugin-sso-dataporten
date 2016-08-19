@@ -98,7 +98,7 @@
 			}
 
 			callback(null, data);
-		})
+		});
 	};
 
 	Dataporten.login = function(profile, callback) {
@@ -108,7 +108,7 @@
 		// If not
 		if(!profile.email) {
 			// See if perhaps we got the Feide username - otherwise, make up a new, non-specific email address from the displayname
-			profile.email = profile.username ? profile.username : unidecode(profile.displayName.replace(" ", ".")).toLowerCase() + '@users.noreply.dataporten.no'
+			profile.email = profile.username ? profile.username : unidecode(profile.displayName.replace(" ", ".")).toLowerCase() + '@users.noreply.dataporten.no';
 		}
 		// Check if Feide username was passed on, build another if not
 		profile.username = profile.username ? profile.username.split("@")[0] : unidecode(profile.displayName.replace(" ", ".")).toLowerCase();
