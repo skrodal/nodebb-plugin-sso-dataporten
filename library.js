@@ -51,10 +51,8 @@
 						return done(null, req.user);
 					}
 
-					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
-					var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
-
-					Dataporten.login(profile.id, profile.displayName, email, function(err, user) {
+					// Dataporten.login(profile.id, profile.displayName, email, function(err, user) {
+					Dataporten.login(profile, function(err, user) {	
 						if (err) {
 							return done(err);
 						}
@@ -101,7 +99,13 @@
 		})
 	};
 
-	Dataporten.login = function(dataportenID, username, email, callback) {
+	// Dataporten.login = function(dataportenID, username, email, callback) {
+	Dataporten.login = function(profile, callback) {
+		var dataportenID = profile.id;
+		var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
+		var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
+
+
 		if (!email) {
 			email = dataportenID + '@users.noreply.dataporten.no';
 		}
@@ -128,7 +132,7 @@
 
 				User.getUidByEmail(email, function(err, uid) {
 					if (!uid) {
-						User.create({username: username, email: email}, function(err, uid) {
+						User.create({username: profile.displayName, email: email}, function(err, uid) {
 							if (err !== null) {
 								callback(err);
 							} else {
