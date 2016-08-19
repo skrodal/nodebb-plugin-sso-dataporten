@@ -53,14 +53,12 @@
 						return done(null, req.user);
 					}
 
-					// Dataporten.login(profile.id, profile.displayName, email, function(err, user) {
 					Dataporten.login(profile, function(err, user) {	
 						if (err) {
 							return done(err);
 						}
 
 						authenticationController.onSuccessfulLogin(req, user.uid);
-
 						done(null, user);
 					});
 
@@ -103,10 +101,8 @@
 		})
 	};
 
-	// Dataporten.login = function(dataportenID, username, email, callback) {
 	Dataporten.login = function(profile, callback) {
 		var dataportenID = profile.id;
-		var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
 		var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
 
 		if (!email) {
@@ -128,14 +124,6 @@
 				var success = function(uid) {
 					User.setUserField(uid, 'dataportenid', dataportenID);
 					db.setObjectField('dataportenid:uid', dataportenID, uid);
-
-					// Set profile photo as well (if available)
-					if(profile.photo){
-						User.uploadFromUrl(uid, profile.photo, function(err, uid) {
-							if (err !== null) { callback(err); } 
-							else { success(uid); }
-						});
-					}
 					callback(null, {
 						uid: uid
 					});
