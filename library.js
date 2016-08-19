@@ -10,6 +10,8 @@
 		DataportenStrategy = require('passport-uninett-dataporten').Strategy;
 
 	var authenticationController = module.parent.require('./controllers/authentication');
+	// Accented characters to plain ascii
+	var unidecode = require('unidecode');
 
 	var constants = Object.freeze({
 		'name': "dataporten",
@@ -132,7 +134,9 @@
 
 				User.getUidByEmail(email, function(err, uid) {
 					if (!uid) {
-						User.create({username: profile.displayName, email: email}, function(err, uid) {
+						// fullname: profile.displayName, 
+						// userslug: unidecode(profile.displayname.replace(' ', '-')).toLowerCase()
+						User.create({username: unidecode(profile.displayName), email: email}, function(err, uid) {
 							if (err !== null) {
 								callback(err);
 							} else {
