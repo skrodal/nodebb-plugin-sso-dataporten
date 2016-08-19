@@ -9,9 +9,6 @@
 		passport = module.parent.require('passport'),
 		DataportenStrategy = require('passport-uninett-dataporten').Strategy;
 
-	// Accented characters to plain ascii
-	var unidecode = require('unidecode');
-	
 	var authenticationController = module.parent.require('./controllers/authentication');
 
 	var constants = Object.freeze({
@@ -54,7 +51,10 @@
 						return done(null, req.user);
 					}
 
-					Dataporten.login(profile, function(err, user) {
+					var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
+					var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
+
+					Dataporten.login(profile.id, profile.displayName, email, function(err, user) {
 						if (err) {
 							return done(err);
 						}
@@ -98,25 +98,15 @@
 			}
 
 			callback(null, data);
-		});
+		})
 	};
 
-	Dataporten.login = function(profile, callback) {
-
-		// Check if we have an email present
-		profile.email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
-		// If not
-		if(!profile.email) {
-			// See if perhaps we got the Feide username - otherwise, make up a new, non-specific email address from the displayname
-			profile.email = profile.username ? profile.username : unidecode(profile.displayName.replace(" ", ".")).toLowerCase() + '@users.noreply.dataporten.no';
+	Dataporten.login = function(dataportenID, username, email, callback) {
+		if (!email) {
+			email = dataportenID + '@users.noreply.dataporten.no';
 		}
-		// Check if Feide username was passed on, build another if not
-		profile.username = profile.username ? profile.username.split("@")[0] : unidecode(profile.displayName.replace(" ", ".")).toLowerCase();
-
-		// Check for photo
-		profile.photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
 		
-		Dataporten.getUidByDataportenID(profile.id, function(err, uid) {
+		Dataporten.getUidByDataportenID(dataportenID, function(err, uid) {
 			if (err) {
 				return callback(err);
 			}
@@ -129,23 +119,22 @@
 			} else {
 				// New User
 				var success = function(uid) {
-					User.setUserField(uid, 'dataportenid', profile.id);
-					db.setObjectField('dataportenid:uid', profile.id, uid);
+					User.setUserField(uid, 'dataportenid', dataportenID);
+					db.setObjectField('dataportenid:uid', dataportenID, uid);
 					callback(null, {
 						uid: uid
 					});
 				};
 
-				User.getUidByEmail(profile.email, function(err, uid) {
+				User.getUidByEmail(email, function(err, uid) {
 					if (!uid) {
-						User.create({fullname: profile.displayName, username: profile.username, userslug: unidecode(profile.displayname.replace(' ', '-')).toLowerCase(),  email: profile.email}, function(err, uid) {
+						User.create({username: username, email: email}, function(err, uid) {
 							if (err !== null) {
 								callback(err);
 							} else {
 								success(uid);
 							}
 						});
-
 					} else {
 						success(uid); // Existing account -- merge
 					}
