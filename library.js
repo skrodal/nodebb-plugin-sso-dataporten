@@ -58,10 +58,19 @@
 						if (err) {
 							return done(err);
 						}
-
 						authenticationController.onSuccessfulLogin(req, user.uid);
+
+						var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
+						// Set profile photo as well (if available)
+						if(profile.photo){
+							User.uploadFromUrl(uid, profile.photo, callback, function(err, uid) {
+								if (err !== null) { callback(err); } 
+								else { success(uid); }
+							});
+						}
 						done(null, user);
 					});
+
 				}));
 
 				strategies.push({
@@ -105,8 +114,6 @@
 	Dataporten.login = function(profile, callback) {
 		var dataportenID = profile.id;
 		var email = Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : '';
-		var photo = Array.isArray(profile.photos) && profile.photos.length ? profile.photos[0].value : '';
-
 
 		if (!email) {
 			email = dataportenID + '@users.noreply.dataporten.no';
@@ -134,8 +141,6 @@
 
 				User.getUidByEmail(email, function(err, uid) {
 					if (!uid) {
-						// fullname: profile.displayName, 
-						// userslug: unidecode(profile.displayname.replace(' ', '-')).toLowerCase()
 						User.create({fullname: profile.displayName, username: unidecode(profile.displayName.replace(" ", ".")).toLowerCase(), email: email}, function(err, uid) {
 							if (err !== null) {
 								callback(err);
