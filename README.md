@@ -73,5 +73,7 @@ And then install the plugin:
 npm install skrodal/nodebb-plugin-sso-dataporten --save
 ```
 
-...back in browser, enable the Dataporten plugin, add Client ID and Secret and restart the server. That's it.
+...back in browser, activate the Dataporten plugin and then use the menu to restart the forum and then refresh the page. 
+
+A 'Social Authentication' in which your Client ID and Secret may be added should now be available. Fill inn and restart the server again. That's it.
 
