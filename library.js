@@ -142,13 +142,6 @@
 							if (err !== null) {
 								callback(err);
 							} else {
-								// Set profile photo as well (if available)
-								if(profile.photo){
-									User.uploadFromUrl(uid, profile.photo, callback, function(err, uid) {
-										if (err !== null) { callback(err); } 
-										else { success(uid); }
-									});
-								}
 								success(uid);
 							}
 						});
