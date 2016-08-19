@@ -136,7 +136,7 @@
 					if (!uid) {
 						// fullname: profile.displayName, 
 						// userslug: unidecode(profile.displayname.replace(' ', '-')).toLowerCase()
-						User.create({username: unidecode(profile.displayName.replace(" ", ".")).toLowerCase(), email: email}, function(err, uid) {
+						User.create({fullname: profile.displayName, username: unidecode(profile.displayName.replace(" ", ".")).toLowerCase(), email: email}, function(err, uid) {
 							if (err !== null) {
 								callback(err);
 							} else {
